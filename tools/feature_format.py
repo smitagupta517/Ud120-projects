@@ -67,7 +67,7 @@ def featureFormat( dictionary, features, remove_NaN=True, remove_all_zeroes=True
             try:
                 dictionary[key][feature]
             except KeyError:
-                print "error: key ", feature, " not present"
+                print ("error: key ", feature, " not present")
                 return
             value = dictionary[key][feature]
             if value=="NaN" and remove_NaN:
@@ -98,7 +98,6 @@ def featureFormat( dictionary, features, remove_NaN=True, remove_all_zeroes=True
         ### Append the data point if flagged for addition.
         if append:
             return_list.append( np.array(tmp_list) )
-
     return np.array(return_list)
 
 

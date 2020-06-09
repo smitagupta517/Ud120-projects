@@ -8,7 +8,7 @@
 
 
 import pickle
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 import sys
 sys.path.append("../tools/")
@@ -39,20 +39,19 @@ def Draw(pred, features, poi, mark_poi=False, name="image.png", f1_name="feature
 
 
 ### load in the dict of dicts containing all the data on each person in the dataset
-data_dict = pickle.load( open("../final_project/final_project_dataset.pkl", "r") )
+data_dict = pickle.load( open("../final_project/final_project_dataset.pkl", "rb") )
 ### there's an outlier--remove it! 
 data_dict.pop("TOTAL", 0)
-
 
 ### the input features we want to use 
 ### can be any key in the person-level dictionary (salary, director_fees, etc.) 
 feature_1 = "salary"
-feature_2 = "exercised_stock_options"
+feature_2 = "from_messages"
+feature_3 = "total_payments"
 poi  = "poi"
 features_list = [poi, feature_1, feature_2]
 data = featureFormat(data_dict, features_list )
 poi, finance_features = targetFeatureSplit( data )
-
 
 ### in the "clustering with 3 features" part of the mini-project,
 ### you'll want to change this line to 
@@ -61,16 +60,54 @@ poi, finance_features = targetFeatureSplit( data )
 for f1, f2 in finance_features:
     plt.scatter( f1, f2 )
 plt.show()
+# salary=[]
+# for i in data_dict.keys():
+#     salary.append(data_dict[i]['salary'])
+salary=[]
+for i in data_dict.keys():
+    if data_dict[i]['salary']!='NaN':
+        salary.append(float(data_dict[i]['salary']))
+    else:
+        salary.append(0)
 
+minimum=1000000000
+for i in range(len(data_dict.keys())):
+    if (salary[i]>0 and salary[i]<minimum):
+        minimum=salary[i]
+print(max(salary),minimum)
+
+from_messages=[]
+for i in data_dict.keys():
+    if data_dict[i]['from_messages']!='NaN':
+        from_messages.append(float(data_dict[i]['from_messages']))
+    else:
+        from_messages.append(0)
+
+minimum=1000000000
+for i in range(len(data_dict.keys())):
+    if (from_messages[i]>0 and from_messages[i]<minimum):
+        minimum=from_messages[i]
+print(max(from_messages),minimum)
+print(salary)
+# from sklearn.preprocessing import MinMaxScaler
+# scaler=MinMaxScaler()
+# rescale=scaler.fit_transform(finance_features)
+# print(scaler.scale_)
+# for i in range(len(data_dict.keys())):
+#     if salary[i]==200000.0:
+#         print(rescale[0][i])
+#     if exercised_stock_options[i]==1000000.00:
+#         print(rescale[1][i])
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
-
-
-
+from sklearn.cluster import KMeans
+kmeans=KMeans(n_clusters=2)
+kmeans.fit(finance_features)
+pred=kmeans.predict(finance_features)
 
 ### rename the "name" parameter when you change the number of features
 ### so that the figure gets saved to a different file
 try:
     Draw(pred, finance_features, poi, mark_poi=False, name="clusters.pdf", f1_name=feature_1, f2_name=feature_2)
 except NameError:
-    print "no predictions object named pred found, no clusters to plot"
+    print ("no predictions object named pred found, no clusters to plot")
